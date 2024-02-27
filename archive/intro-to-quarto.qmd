@@ -1,0 +1,64 @@
+---
+title: "My First Quarto Document"
+author: "Rebecca Van Wyck"
+format: html
+bibliography: references.bib
+---
+
+# Header 1
+
+## Header 2
+
+### Header 3
+
+#### Header 4
+
+##### Header 5
+
+**this is bold**
+
+*this is italic*
+
+superscript^2^
+
+~~strikethrough~~
+
+[link](www.rstudio.com)
+
+inline equation: $A = \pi*r^{2}$
+
+horizontal rule (or slide break):
+
+------------------------------------------------------------------------
+
+> block quote
+
+-   unordered list
+-   item 2
+    -   sub-item 1
+    -   sub-item 2
+
+1.  Main Item 1
+    1.  Sub-item 1
+    2.  Sub-item 2
+2.  Main Item 2
+    1.  Sub-item 1
+    2.  Sub-item 2
+3.  Main Item 3
+
+| Table Header | Second Header |
+|--------------|---------------|
+| Table Cell   | Cell 2        |
+| Cell 3       | Cell 4        |
+
+This is a very important fact [@universityoftexasatelpaso2018]
+
+This is also a very important fact [@oke2020]
+
+```{r}
+2 * 2
+```
+
+```{r}
+3*4
+```

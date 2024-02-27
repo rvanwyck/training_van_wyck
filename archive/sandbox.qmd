@@ -1,0 +1,56 @@
+---
+title: "Sandbox"
+format: html
+editor: visual
+---
+
+## Set up
+```{r}
+#| warning: false
+library(readr)
+library(dplyr)
+```
+
+## Load data
+```{r}
+#| warning: false
+# Load the data from CSV
+data <- read_csv("data/class_data.csv")
+```
+## Create function (split_and_count) for calculations
+```{r}
+today_date <- Sys.time()
+
+  # Check if today_date is a Date object
+  if (!inherits(today_date, "Date")) {
+    today_date <- as.Date(today_date, format = "%y%m%d")
+  }
+
+split_and_count <- function(data, today_date) {
+
+  # Ensure complete_by is a Date object
+  data$complete_by <- as.Date(as.character(data$complete_by), format = "%y%m%d")
+  
+  # Split the data and create the occurred variable
+  data <- data %>% 
+    mutate(occurred = ifelse(complete_by < today_date, 1, 0))
+  
+  # Count the number of 1s in occurred
+  count_ones <- sum(data$occurred == 1)
+
+  # Calculate credits and percent_done
+  percent_done <- count_ones / 11
+
+  # Round percent_done to no decimal places and convert to percentage
+  percent_done_formatted <- paste0(round(percent_done * 100), "%")
+
+  return(list(split_data = data, count_ones = count_ones, percent_done = percent_done_formatted))
+}
+result <- split_and_count(data, today_date)
+
+result$split_data # To view the modified data
+result$count_ones # To view the count of 1s
+result$percent_done # To view the percent_done as a formatted percentage
+```
+
+
