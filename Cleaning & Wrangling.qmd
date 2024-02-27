@@ -1,0 +1,18 @@
+---
+title: "Cleaning & Wrangling"
+format: html
+editor: visual
+---
+
+```{r}
+#| message:false
+# load packages
+library(dplyr)
+library(tidyr)
+library(readr)
+```
+#Get Data
+```{r}
+catch_original <- read_csv(url("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.302.1", method = "libcurl"))
+```
+
