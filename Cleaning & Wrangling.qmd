@@ -14,9 +14,7 @@ library(readr)
 
 # Data Sources
 
-Data obtained from <https://knb.ecoinformatics.org/view/df35b.304.2>
-### Alaska commercial salmon catches by management region (1886- 1997) By Mike Byerly
-file named	byerlySalmonByRegion.csv
+Data obtained from <https://knb.ecoinformatics.org/view/df35b.304.2> \### Alaska commercial salmon catches by management region (1886- 1997) By Mike Byerly file named byerlySalmonByRegion.csv
 
 ## Read in the data
 
@@ -25,6 +23,7 @@ catch_original <- read_csv("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/d
 ```
 
 ## Explore data
+
 ```{r}
 ## Prints the column names of my data frame
 colnames(catch_original)
@@ -42,12 +41,12 @@ unique(catch_original$Region)
 #View(catch_original)
 ```
 
-
 # Clean and Reshape data
-%>%
-Windows: Ctrl + Shift + M
+
+%\>% Windows: Ctrl + Shift + M
 
 ## Using select() function
+
 ```{r}
 catch_data <- catch_original %>%
     select(Region, Year, Chinook, Sockeye, Coho, Pink, Chum)
@@ -57,23 +56,28 @@ catch_data <- catch_original %>%
     select(-All,-notesRegCode)
 head(catch_data)
 ```
-    
+
 ## Check column types
+
 ```{r}
 dplyr::glimpse(catch_data)
 ```
+
 ```{r}
 catch_clean <- catch_data %>%
     mutate(Chinook = as.numeric(Chinook))
 head(catch_clean)
 ```
+
 ```{r}
 i <- which(is.na(catch_clean$Chinook))
 i
 
 catch_data[i,]
 ```
+
 ## Replace values in a column
+
 ```{r}
 catch_clean <- catch_data %>%
     mutate(Chinook = if_else(condition = Chinook == "I", 
@@ -86,9 +90,10 @@ catch_clean[i, ]
 ```
 
 ## Reshape data
+
 ```{r}
 catch_long <- catch_clean %>% 
-    #pivot longer all columns except Region and Year
+#pivot longer all columns except Region and Year
     pivot_longer(
         cols = -c(Region, Year),
         names_to = "species",
@@ -98,13 +103,161 @@ catch_long <- catch_clean %>%
 head(catch_long)
 ```
 
+```{r}
+catch_wide <- catch_long %>%
+    pivot_wider(names_from = species,
+                values_from = catch)
+
+head(catch_wide)
+```
 
 ## Rename columns rename()
 
+```{r}
+catch_long <- catch_long %>%
+    rename(catch_thousands = catch)
+
+head(catch_long)
+```
+
+> **`names()` versus `rename()`**
+>
+> Many people use the base R function `names()` to rename columns, often in combination with column indexing that relies on columns being in a particular order. Column indexing is often also used to select columns instead of the `select()` function from `dplyr`. Although these methods work just fine, they do have one major drawback: in most implementations they rely on you knowing exactly the column order your data is in.
+>
+> **To illustrate why your knowledge of column order isn’t reliable enough for these operations, considering the following scenario:**
+>
+> Your colleague emails you letting you know that she has an updated version of the conductivity-temperature-depth data from this year’s research cruise, and sends it along. Excited, you re-run your scripts that use this data for your phytoplankton research. You run the script and suddenly all of your numbers seem off. You spend hours trying to figure out what is going on.
+>
+> Unbeknownst to you, your colleagues bought a new sensor this year that measures dissolved oxygen. Because of the new variables in the data set, the column order is different. Your script which previously renamed the fourth column, `SAL_PSU` to `salinity` now renames the fourth column, `O2_MGpL` to `salinity`. No wonder your results looked so weird, good thing you caught it!
+>
+> If you had written your code so that it doesn’t rely on column order, but instead renames columns using the `rename()` function, the code would have run just fine (assuming the name of the original salinity column didn’t change, in which case the code would have thrown an error in an obvious way). This is an example of a *defensive coding strategy*, where you try to anticipate issues before they arise, and write your code in such a way as to keep the issues from happening.
+
+## Adding columns using mutate()
+```{r}
+catch_long <- catch_long %>%
+    mutate(catch = catch_thousands * 1000) %>%
+    select(-catch_thousands)
+
+head(catch_long)
+```
+
+
 ## Summary stats using group_by() and summarize()
+```{r}
+unique(catch_original$Region)
+```
+```{r}
+mean_region <- catch_long %>%
+    group_by(Region) %>%
+    summarize(mean_catch = mean(catch))
+
+head(mean_region)
+```
+```{r}
+n_region <- catch_long %>%
+    group_by(Region) %>%
+    summarize(n = n())
+
+head(n_region)
+```
+```{r}
+n_species <- catch_long %>%
+    group_by(species) %>%
+#    summarize(n = n())
+     summarize(total_year = sum(catch, na.rm = T))
+
+head(n_species)
+```
 
 ## Filtering rows using filter()
+```{r}
+## Catches over a million fish
+catch_million <- catch_long %>%
+    filter(catch > 1000000)
+
+## Chinook from SSE data
+chinook_see <- catch_long %>%
+    filter(Region == "SSE",
+           species == "Chinook")
+
+## OR
+## chinook_see <- catch_long %>%
+##    filter(Region == "SSE" & species == "Chinook")
+
+head(sse_catch)
+```
 
 ## Sort data using arrange()
+```{r}
+mean_region <- catch_long %>%
+    group_by(Region) %>%
+    summarize(mean_catch = mean(catch)) %>%
+    arrange(mean_catch)
+
+head(mean_region)
+```
+The default sorting order of arrange() is to sort in ascending order. To reverse the sort order, wrap the column name inside the desc() function:
+```{r}
+mean_region <- catch_long %>%
+    group_by(Region) %>%
+    summarize(mean_catch = mean(catch)) %>%
+    arrange(desc(mean_catch))
+
+head(mean_region)
+```
 
 ## Split and combine values in columns
+```{r}
+sites_df <- data.frame(site = c("HAW-101",
+                                "HAW-103",
+                                "OAH-320",
+                                "OAH-219",
+                                "MAU-039"))
+
+sites_df %>%
+    separate(site, c("island", "site_number"), "-")
+```
+```{r}
+## create `cities_df`
+cities_df <- data.frame(city = c("Juneau AK",
+                                 "Sitka AK",
+                                 "Anchorage AK"))
+
+cities_df %>%
+    separate(city, c("city", "state_code"), " ")
+```
+```{r}
+dates_df <- data.frame(
+    year = c("1930",
+             "1930",
+             "1930"),
+    month = c("12",
+              "12",
+              "12"),
+    day = c("14",
+            "15",
+            "16")
+)
+
+dates_df %>%
+    unite(date, year, month, day, sep = "-")
+```
+```{r}
+catch_original <- read_csv(url("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.302.1", 
+                               method = "libcurl"))
+
+mean_region <- catch_original %>%
+  select(-All, -notesRegCode) %>% 
+  mutate(Chinook = ifelse(Chinook == "I", 1, Chinook)) %>% 
+  mutate(Chinook = as.numeric(Chinook)) %>% 
+  pivot_longer(-c(Region, Year), 
+               names_to = "species", 
+               values_to = "catch") %>%
+  mutate(catch = catch*1000) %>% 
+  group_by(Region) %>% 
+  summarize(mean_catch = mean(catch)) %>% 
+  arrange(desc(mean_catch))
+
+head(mean_region)
+```
+
