@@ -2,7 +2,7 @@
 
 > **IZUCHUKWU EZUKANMA**: It is interesting collaborating with you on this project.
 >
-> **Rebecca Van Wyck:** My pleasure.
+> **Rebecca Van Wyck:** My pleasure!
 
 ## This README file was created and altered at the 2024 arctic-2024-training on February, 28, 2024.
 
