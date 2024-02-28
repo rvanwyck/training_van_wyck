@@ -5,6 +5,7 @@ editor: visual
 ---
 
 ## Set up
+
 ```{r}
 #| warning: false
 library(readr)
@@ -12,12 +13,15 @@ library(dplyr)
 ```
 
 ## Load data
+
 ```{r}
 #| warning: false
 # Load the data from CSV
 data <- read_csv("data/class_data.csv")
 ```
+
 ## Create function (split_and_count) for calculations
+
 ```{r}
 today_date <- Sys.time()
 
@@ -52,5 +56,3 @@ result$split_data # To view the modified data
 result$count_ones # To view the count of 1s
 result$percent_done # To view the percent_done as a formatted percentage
 ```
-
-
