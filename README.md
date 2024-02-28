@@ -16,6 +16,5 @@ We want to stage a conflict
 [Training materials](https://learning.nceas.ucsb.edu/2024-02-arctic/session_09.html)
 
 ### I'm maiking more changes now for the merging changes exercise.
-<<<<<<< HEAD
 ### I'm maiking MORE changes now for the merging changes exercise.
 
