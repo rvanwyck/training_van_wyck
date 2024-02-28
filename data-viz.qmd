@@ -1,0 +1,117 @@
+---
+title: "Intro to Data Viz"
+format: html
+---
+
+## Set Up
+
+```{r}
+library(readr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(janitor)
+library(scales)
+library(leaflet)
+library(DT)
+```
+
+## read Data
+
+```{r}
+escape_raw <- read_csv("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/urn%3Auuid%3Af119a05b-bbe7-4aea-93c6-85434dcb1c5e")
+```
+
+## Explore Data
+
+```{r}
+#| eval: false
+
+## Check out column names
+colnames(escape_raw)
+
+## Peak at each column and class
+glimpse(escape_raw)
+
+## From when to when
+range(escape_raw$sampleDate)
+
+## Which species?
+unique(escape_raw$Species)
+```
+
+## Clean Data
+
+```{r}
+escape <- escape_raw %>% 
+    janitor::clean_names()
+
+colnames(escape)
+```
+
+## Calculate the Annual escapements by species and sasap regions
+
+```{r}
+annual_esc <- escape %>%
+    separate(sample_date, c("year", "month", "day"), sep = "-") %>%
+    mutate(year = as.numeric(year)) %>%
+    group_by(species, sasap_region, year) %>%
+    summarize(escapement = sum(daily_count)) %>%
+    filter(species %in% c("Chinook", "Sockeye", "Chum", "Coho", "Pink")) %>%
+    ungroup()
+    
+unique(annual_esc$species)
+
+head(annual_esc)
+```
+
+## Using ggplot2
+
+\<!--# Indicate we are using `ggplot()` (call the `ggplot2::ggplot()` function)
+
+1.  What data do we want to plot? (`data = my_data`)
+
+2.  What is my mapping aesthetics? What variables do we want to plot? (define using`aes()` function)
+
+3.  Define the geometry of our plot. This specifies the type of plot we’re making (use `geom_*()` to indicate the type of plot e.g: point, bar, etc.)
+
+**Note** To add layers to our plot, for example, additional geometries/aesthetics and theme elements or any `ggplot` object we use `+`. --\>
+
+```{r}
+## All of this code should create the same plot
+
+## Option 1 - data and mapping called in the ggplot() function
+ggplot(data = annual_esc,
+       aes(x = species, y = escapement)) +
+    geom_col()
+
+## Option 2 - data called in ggplot function; mapping called in geom
+#ggplot(data = annual_esc) +
+#    geom_col(aes(x = species, y = escapement))
+
+
+## Option 3 - data and mapping called in geom
+#ggplot() +
+#    geom_col(data = annual_esc,
+#            aes(x = species, y = escapement))
+```
+
+\<!--# Indicate we are using `ggplot()` (call the `ggplot2::ggplot()` function)
+
+1.  What data do we want to plot? (`data = my_data`)
+
+2.  What is my mapping aesthetics? What variables do we want to plot? (define using`aes()` function)
+
+3.  Define the geometry of our plot. This specifies the type of plot we’re making (use `geom_*()` to indicate the type of plot e.g: point, bar, etc.)
+
+**Note** To add layers to our plot, for example, additional geometries/aesthetics and theme elements or any `ggplot` object we use `+`. --\>
+
+### Boxplot
+```{r}
+annual_esc %>%
+    filter(year == 1974,
+          species %in% c("Chum", "Pink")) %>%
+    ggplot(aes(x = species, y = escapement)) +
+    geom_boxplot()
+```
+
