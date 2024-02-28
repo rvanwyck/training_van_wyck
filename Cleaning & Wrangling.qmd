@@ -1,11 +1,10 @@
 ---
 title: "Cleaning & Wrangling"
 format: html
-editor: visual
 ---
 
 ```{r}
-#| message:false
+#| message: false
 # load packages
 library(dplyr)
 library(tidyr)
@@ -133,6 +132,7 @@ head(catch_long)
 > If you had written your code so that it doesn’t rely on column order, but instead renames columns using the `rename()` function, the code would have run just fine (assuming the name of the original salinity column didn’t change, in which case the code would have thrown an error in an obvious way). This is an example of a *defensive coding strategy*, where you try to anticipate issues before they arise, and write your code in such a way as to keep the issues from happening.
 
 ## Adding columns using mutate()
+
 ```{r}
 catch_long <- catch_long %>%
     mutate(catch = catch_thousands * 1000) %>%
@@ -141,11 +141,12 @@ catch_long <- catch_long %>%
 head(catch_long)
 ```
 
-
 ## Summary stats using group_by() and summarize()
+
 ```{r}
 unique(catch_original$Region)
 ```
+
 ```{r}
 mean_region <- catch_long %>%
     group_by(Region) %>%
@@ -153,6 +154,7 @@ mean_region <- catch_long %>%
 
 head(mean_region)
 ```
+
 ```{r}
 n_region <- catch_long %>%
     group_by(Region) %>%
@@ -160,6 +162,7 @@ n_region <- catch_long %>%
 
 head(n_region)
 ```
+
 ```{r}
 n_species <- catch_long %>%
     group_by(species) %>%
@@ -170,24 +173,26 @@ head(n_species)
 ```
 
 ## Filtering rows using filter()
+
 ```{r}
 ## Catches over a million fish
-catch_million <- catch_long %>%
-    filter(catch > 1000000)
+#catch_million <- catch_long %>%
+#    filter(catch > 1000000)
 
 ## Chinook from SSE data
-chinook_see <- catch_long %>%
-    filter(Region == "SSE",
-           species == "Chinook")
+#chinook_see <- catch_long %>%
+#    filter(Region == "SSE",
+#           species == "Chinook")
 
 ## OR
 ## chinook_see <- catch_long %>%
 ##    filter(Region == "SSE" & species == "Chinook")
 
-head(sse_catch)
+#head(sse_catch)
 ```
 
 ## Sort data using arrange()
+
 ```{r}
 mean_region <- catch_long %>%
     group_by(Region) %>%
@@ -196,7 +201,9 @@ mean_region <- catch_long %>%
 
 head(mean_region)
 ```
+
 The default sorting order of arrange() is to sort in ascending order. To reverse the sort order, wrap the column name inside the desc() function:
+
 ```{r}
 mean_region <- catch_long %>%
     group_by(Region) %>%
@@ -207,6 +214,7 @@ head(mean_region)
 ```
 
 ## Split and combine values in columns
+
 ```{r}
 sites_df <- data.frame(site = c("HAW-101",
                                 "HAW-103",
@@ -217,6 +225,7 @@ sites_df <- data.frame(site = c("HAW-101",
 sites_df %>%
     separate(site, c("island", "site_number"), "-")
 ```
+
 ```{r}
 ## create `cities_df`
 cities_df <- data.frame(city = c("Juneau AK",
@@ -226,6 +235,7 @@ cities_df <- data.frame(city = c("Juneau AK",
 cities_df %>%
     separate(city, c("city", "state_code"), " ")
 ```
+
 ```{r}
 dates_df <- data.frame(
     year = c("1930",
@@ -242,6 +252,7 @@ dates_df <- data.frame(
 dates_df %>%
     unite(date, year, month, day, sep = "-")
 ```
+
 ```{r}
 catch_original <- read_csv(url("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.302.1", 
                                method = "libcurl"))
@@ -260,4 +271,3 @@ mean_region <- catch_original %>%
 
 head(mean_region)
 ```
-
