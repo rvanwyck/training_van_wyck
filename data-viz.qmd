@@ -16,11 +16,13 @@ library(leaflet)
 library(DT)
 ```
 
-## read Data
+## Read Data
 
 ```{r}
 escape_raw <- read_csv("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/urn%3Auuid%3Af119a05b-bbe7-4aea-93c6-85434dcb1c5e")
 ```
+
+All exercises can be found here <https://learning.nceas.ucsb.edu/2024-02-arctic/session_11.html>
 
 ## Explore Data
 
@@ -107,11 +109,138 @@ ggplot(data = annual_esc,
 **Note** To add layers to our plot, for example, additional geometries/aesthetics and theme elements or any `ggplot` object we use `+`. --\>
 
 ### Boxplot
+
+You csn pipe operator to pass into ggplot() a filtered version of annual_esc, and make a plot with different geometries.
+
 ```{r}
 annual_esc %>%
     filter(year == 1974,
           species %in% c("Chum", "Pink")) %>%
     ggplot(aes(x = species, y = escapement)) +
     geom_boxplot()
+```
+
+Making bars blue on column plot:
+
+```{r}
+ggplot(annual_esc,
+       aes(x = species, y = escapement,
+           fill = "blue")) +
+    geom_col()
+```
+
+Mistake! "blue" was added to the aes row and added to dataset. Instead you should put the "blue" in the geom_col function -- it makes a big difference! the aes() function ALMWAYS refers to the dataset. Let's try again:
+
+```{r}
+ggplot(annual_esc,
+       aes(x = species, y = escapement)) +
+    geom_col(fill = "blue")
+```
+
+Adding Regions to our plot:
+
+```{r}
+ggplot(annual_esc,
+       aes(x = species, y = escapement,
+           fill = sasap_region)) +
+    geom_col()
+```
+
+## Create multiple plots
+
+```{r}
+## Subset with data from years 2000 to 2016
+
+annual_esc_2000s <- annual_esc %>%
+    filter(year %in% c(2000:2016))
+
+## Quick check
+unique(annual_esc_2000s$year)
+```
+
+```{r}
+## Plot with facets
+ggplot(annual_esc_2000s,
+       aes(x = year,
+           y = escapement,
+           color = species)) +
+    geom_line() +
+    geom_point() +
+    facet_wrap( ~ sasap_region,
+                scales = "free_y")
+```
+
+## Setting ggplot themes
+
+\<!--# Add a title using `labs()`
+
+-   Adjust labels using `labs()`
+
+-   Include a built in theme using `theme_bw()`
+
+There are a wide variety of built in themes in `ggplot` that help quickly set the look of the plot. Use the RStudio autocomplete `theme_` `<TAB>` to view a list of theme functions.--\>
+
+```{r}
+ggplot(annual_esc_2000s,
+       aes(x = year,
+           y = escapement,
+           color = species)) +
+    geom_line() +
+    geom_point() +
+    facet_wrap( ~ sasap_region,
+                scales = "free_y") +
+    labs(title = "Annual Salmon Escapement by Region",
+         y = "Escapement") +
+    theme_bw()
+```
+
+Themes:
+
+\<!--# The built in theme functions (`theme_*()`) change the default settings for many elements that can also be changed individually using the`theme()` function. The `theme()` function is a way to further fine-tune the look of your plot. This function takes MANY arguments (just have a look at `?theme`). Luckily there are many great `ggplot` resources online so we don’t have to remember all of these, just Google [“ggplot cheat sheet”](https://www.google.com/search?q=ggplot+cheat+sheet&rlz=1C5CHFA_enUS989US989&oq=ggplot+chea&aqs=chrome.0.0i433i512j69i57j0i512l2j0i22i30i395l2.1681j1j7&sourceid=chrome&ie=UTF-8) and find one you like. --\>
+
+```{r}
+ggplot(annual_esc_2000s,
+       aes(x = year,
+           y = escapement,
+           color = species)) +
+    geom_line() +
+    geom_point() +
+    facet_wrap( ~ sasap_region,
+                scales = "free_y") +
+    labs(title = "Annual Salmon Escapement by Region",
+         y = "Escapement") +
+    theme_light() +
+    theme(legend.position = "bottom",
+          legend.title = element_blank())
+```
+
+```{r}
+my_theme <- theme_light() +
+    theme(legend.position = "bottom",
+          legend.title = element_blank())
+```
+
+
+```{r}
+ggplot(annual_esc_2000s,
+       aes(x = year,
+           y = escapement,
+           color = species)) +
+    geom_line() +
+    geom_point() +
+    scale_x_continuous(breaks = seq(2000, 2016, 2)) +
+    scale_y_continuous(labels = comma) +
+    facet_wrap( ~ sasap_region,
+                scales = "free_y") +
+    labs(title = "Annual Salmon Escapement by Region",
+         y = "Escapement") +
+    my_theme +
+    theme(axis.text.x = element_text(angle = 45,
+                                     vjust = 0.5))
+```
+
+
+```{r}
+ggsave("figures/annualsalmon_esc_region.jpg", width = 8, height = 6, units = "in")
 ```
 
